@@ -58,6 +58,8 @@ namespace CustomIdentityAuthentication.Controllers
                 var result = await _userManager.CreateAsync(user,model.Password);
                 if(result.Succeeded)
                 {
+                    // Assign a default role to the user (you can change this as needed)
+                    await _userManager.AddToRoleAsync(user, "User");
                     await _signInManager.SignInAsync(user, false);
                     return RedirectToAction("Index","Home");
                 }
