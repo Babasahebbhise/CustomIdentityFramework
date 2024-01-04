@@ -20,7 +20,7 @@ namespace CustomIdentityAuthentication.Controllers
             return View();
         }
 
-        [Authorize(Roles = "Admin")]
+        [TypeFilter(typeof(RoleAuthorizationFilter), Arguments = new object[] { "User" })]
         public IActionResult Privacy()
         {
             return View();
