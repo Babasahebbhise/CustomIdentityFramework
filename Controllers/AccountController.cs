@@ -8,10 +8,12 @@ namespace CustomIdentityAuthentication.Controllers
     {
         private readonly SignInManager<User> _signInManager;
         private readonly UserManager<User> _userManager;
-        public AccountController(SignInManager<User> signInManager, UserManager<User> userManager)
+        private readonly RoleManager<IdentityRole> _roleManager;
+        public AccountController(SignInManager<User> signInManager, UserManager<User> userManager, RoleManager<IdentityRole> roleManager)
         {
             _signInManager = signInManager;
             _userManager = userManager;
+            _roleManager = roleManager;
         }
 
         public IActionResult Index()
@@ -58,8 +60,18 @@ namespace CustomIdentityAuthentication.Controllers
                 var result = await _userManager.CreateAsync(user,model.Password);
                 if(result.Succeeded)
                 {
-                    // Assign a default role to the user (you can change this as needed)
+                    var roleExists = await _roleManager.RoleExistsAsync("User");
+
+                    if (!roleExists)
+                    {
+                        // Create the "User" role
+                        var role = new IdentityRole("User");
+                        await _roleManager.CreateAsync(role);
+                    }
+
+                    // Assign the user to the "User" role
                     await _userManager.AddToRoleAsync(user, "User");
+
                     await _signInManager.SignInAsync(user, false);
                     return RedirectToAction("Index","Home");
                 }
